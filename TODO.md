@@ -69,5 +69,6 @@
 
 ## Phase 9 — Certification and guarded release
 
-- [ ] Produce a standalone verifier, CI gate, operational runbook, SBOM, signed artifact manifest, benchmark evidence, and security review record.
-- [ ] Allow editions to pin a release only after the mandatory staging evidence and their existing Core admission/certification/GA policy gates are satisfied.
+- [x] Implement the `brick.host-isolation.certification.v1` contract and fail-closed authority that verifies signed artifact-manifest/SBOM linkage, benchmark evidence, independent security review, Shared and Dedicated Phase 8 staging evidence, and all existing Core admission/certification/GA gates before issuing an expiring Ed25519-signed guarded-release certificate.
+- [x] Add deterministic adversarial tests, a standalone verifier, Phase 9 operational runbook, SBOM/artifact-manifest/security-review templates, release-gate script, and GitHub Actions job.
+- [ ] Execute the protected release ceremony for a real immutable candidate: produce and sign the actual SBOM, artifact manifest, benchmark evidence, security review record, both staging records, and six Core gate records; retain them with the certificate before either edition pins the release.

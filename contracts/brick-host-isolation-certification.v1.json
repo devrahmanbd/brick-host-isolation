@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://brick.example/contracts/brick-host-isolation-certification.v1.json",
+  "title": "Brick Host Isolation Certification and Guarded Release Contract",
+  "type": "object",
+  "required": ["schema", "releaseId", "sourceCommit", "artifactManifest", "benchmarkEvidence", "securityReview", "stagingEvidence", "coreGates"],
+  "properties": {
+    "schema": { "const": "brick.host-isolation.certification.v1" },
+    "releaseId": { "type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "sourceCommit": { "type": "string", "pattern": "^[a-f0-9]{40,64}$" },
+    "artifactManifest": { "$ref": "#/$defs/signedRecord" },
+    "benchmarkEvidence": { "$ref": "#/$defs/signedRecord" },
+    "securityReview": { "$ref": "#/$defs/signedRecord" },
+    "stagingEvidence": {
+      "type": "object",
+      "required": ["shared", "dedicated"],
+      "additionalProperties": false,
+      "properties": {
+        "shared": { "$ref": "#/$defs/signedRecord" },
+        "dedicated": { "$ref": "#/$defs/signedRecord" }
+      }
+    },
+    "coreGates": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": { "$ref": "#/$defs/signedRecord" }
+    }
+  },
+  "$defs": {
+    "signedRecord": {
+      "type": "object",
+      "required": ["schema", "signatureAlgorithm", "signature"],
+      "properties": {
+        "schema": { "type": "string" },
+        "signatureAlgorithm": { "const": "ed25519" },
+        "signature": { "type": "string", "minLength": 86, "maxLength": 86 }
+      }
+    }
+  },
+  "additionalProperties": false
+}

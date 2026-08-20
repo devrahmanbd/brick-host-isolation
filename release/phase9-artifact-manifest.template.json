@@ -1,0 +1,16 @@
+{
+  "schema": "brick.host-isolation.artifact-manifest.v1",
+  "releaseId": "REPLACE_RELEASE_ID",
+  "sourceCommit": "REPLACE_40_TO_64_HEX_COMMIT",
+  "createdAt": "REPLACE_RFC3339_UTC_TIMESTAMP",
+  "sbomDigest": "REPLACE_64_HEX_SHA256",
+  "artifacts": [
+    {
+      "path": "REPLACE_RELATIVE_ARTIFACT_PATH",
+      "digest": "REPLACE_64_HEX_SHA256",
+      "sizeBytes": 1
+    }
+  ],
+  "signatureAlgorithm": "ed25519",
+  "signature": "REPLACE_WITH_RELEASE_SIGNING_KEY_SIGNATURE"
+}
