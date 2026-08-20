@@ -71,4 +71,5 @@
 
 - [x] Implement the `brick.host-isolation.certification.v1` contract and fail-closed authority that verifies signed artifact-manifest/SBOM linkage, benchmark evidence, independent security review, Shared and Dedicated Phase 8 staging evidence, and all existing Core admission/certification/GA gates before issuing an expiring Ed25519-signed guarded-release certificate.
 - [x] Add deterministic adversarial tests, a standalone verifier, Phase 9 operational runbook, SBOM/artifact-manifest/security-review templates, release-gate script, and GitHub Actions job.
+- [x] Select and record an immutable `main` release candidate with a semantic release identifier and verified full commit SHA; this record is not signed production-release evidence. Candidate: `v1.0.0` at `b2ff94d6f8496bd9f14fe55cff651422b953d31c` in `release/RELEASE_CANDIDATE_v1.0.0.md`.
 - [ ] Execute the protected release ceremony for a real immutable candidate: produce and sign the actual SBOM, artifact manifest, benchmark evidence, security review record, both staging records, and six Core gate records; retain them with the certificate before either edition pins the release.
