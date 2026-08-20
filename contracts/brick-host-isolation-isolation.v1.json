@@ -1,0 +1,17 @@
+{
+  "schema": "brick.host-isolation.isolation.v1",
+  "purpose": "Strict declarative namespace, mount, process, capability, descriptor, device, and seccomp plan consumed only by a future root-owned atomic executor.",
+  "requiredNamespaces": ["user", "pid", "mount", "ipc", "uts", "network"],
+  "requiredExecutionControls": ["clearEnvironment", "closeDescriptorsFrom3", "noNewPrivileges", "parentDeathSignalKill", "supervisedReaper", "workingDirectoryRoot"],
+  "forbiddenInheritedState": ["ambientCapabilities", "hostNetwork", "inheritedDescriptors", "inheritedEnvironment", "inheritedMountPropagation", "inheritedWorkingDirectory"],
+  "requiredMounts": [
+    {"sourceKind": "baseRoot", "destination": "/", "readOnly": true, "requiredFlags": ["nodev", "nosuid", "noexec", "readonly"]},
+    {"sourceKind": "proc", "destination": "/proc", "readOnly": true, "requiredFlags": ["nodev", "nosuid", "noexec"]},
+    {"sourceKind": "minimalDev", "destination": "/dev", "readOnly": false, "requiredFlags": ["nodev", "nosuid", "noexec"]},
+    {"sourceKind": "tmpfs", "destination": "/tmp", "readOnly": false, "requiredFlags": ["nodev", "nosuid", "noexec"]}
+  ],
+  "allowedDevices": ["null", "zero", "random", "urandom"],
+  "forbiddenDestinationPrefixes": ["/opt/brick", "/var/lib/brick", "/run/brick", "/etc/brick", "/root", "/proc/sys", "/proc/kcore", "/sys", "/dev/mem", "/dev/kmem", "/dev/kmsg", "/var/run/docker.sock", "/run/containerd/containerd.sock"],
+  "requiredSeccomp": {"mode": "allowlist", "minimumDigestAlgorithm": "sha256"},
+  "profiles": ["sharedTenant", "dedicatedAdministrator"]
+}

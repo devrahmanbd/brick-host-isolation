@@ -34,8 +34,10 @@
 
 ## Phase 4 — Namespace, mount, process, and capability boundaries
 
-- [ ] Create isolated user, PID, mount, IPC, UTS, and network namespaces with explicit UID/GID mapping and no inherited process, file descriptor, environment, or capability state.
-- [ ] Enforce `no_new_privs`, a minimal capability set, filtered `/proc`, restricted `/dev`, controlled `/tmp`, strict mount flags, and a tested seccomp allow-list per profile.
+- [x] Define a strict namespace, mount, process, capability, descriptor, device, and seccomp plan that requires isolated user, PID, mount, IPC, UTS, and network namespaces; explicit non-root UID/GID mapping; and no inherited process state, descriptors, environment, or capabilities.
+- [x] Require `no_new_privs`, empty capability bounding set, filtered `/proc`, restricted `/dev`, bounded `/tmp`, strict mount flags, a supervised reaper, parent-death signaling, and a SHA-256 seccomp profile digest per profile.
+- [x] Add deterministic adversarial tests, a standalone plan verifier, Phase 4 operational runbook, release gate, and GitHub Actions job.
+- [ ] Implement and independently validate a root-owned atomic executor, then demonstrate namespace, descriptor, environment, process, device, mount, and capability escape resistance on an isolated staging host before it creates a customer workload.
 
 ## Phase 5 — Cgroup v2 and default-deny network enforcement
 

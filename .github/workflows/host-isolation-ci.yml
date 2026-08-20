@@ -48,3 +48,16 @@ jobs:
           check-latest: true
       - name: Validate Phase 3 host preflight and immutable base root
         run: bash ci/phase3-validate.sh
+
+  phase4-isolation-plan:
+    name: Phase 4 isolation-plan gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          check-latest: true
+      - name: Validate Phase 4 isolation plan
+        run: bash ci/phase4-validate.sh
