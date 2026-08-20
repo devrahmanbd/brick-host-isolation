@@ -48,6 +48,10 @@ func verify() error {
 	if err := json.Unmarshal(data, &contract); err != nil || contract.Schema != edition.Schema {
 		return fmt.Errorf("invalid edition contract")
 	}
+	releaseBinding, err := loadReleaseBinding()
+	if err != nil {
+		return err
+	}
 	template := func(profile lifecycle.Profile, executable string) edition.Template {
 		return edition.Template{
 			Profile: profile,
@@ -88,9 +92,30 @@ func verify() error {
 	if err != nil {
 		return err
 	}
-	evidence, err := staging.Run(context.Background(), "spiffe://brick/verify", "11111111-1111-4111-8111-111111111111", compilation)
+	evidence, err := staging.Run(context.Background(), "spiffe://brick/verify", "11111111-1111-4111-8111-111111111111", compilation, releaseBinding)
 	if err != nil {
 		return err
 	}
 	return edition.VerifyEvidence(evidence, key.Public().(ed25519.PublicKey))
+}
+
+func loadReleaseBinding() (edition.ReleaseEvidenceBinding, error) {
+	paths := []string{}
+	if path := os.Getenv("BRICK_RELEASE_EVIDENCE_BINDING_FIXTURE"); path != "" {
+		paths = append(paths, path)
+	}
+	paths = append(paths,
+		"contracts/fixtures/release-evidence-binding.v1.valid.json",
+		"../contracts/fixtures/release-evidence-binding.v1.valid.json",
+	)
+	var last error
+	for _, path := range paths {
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			last = err
+			continue
+		}
+		return edition.LoadReleaseEvidenceBinding(raw)
+	}
+	return edition.ReleaseEvidenceBinding{}, last
 }

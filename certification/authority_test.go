@@ -151,6 +151,7 @@ type fixture struct {
 	limiter           *allowLimiter
 	manifestPrivate   ed25519.PrivateKey
 	reviewPrivate     ed25519.PrivateKey
+	stagingPrivate    ed25519.PrivateKey
 	certificatePublic ed25519.PublicKey
 }
 
@@ -163,12 +164,17 @@ func newFixture(t testing.TB) fixture {
 	stagingPublic, stagingPrivate := keyPair(t)
 	corePublic, corePrivate := keyPair(t)
 	certificatePublic, certificatePrivate := keyPair(t)
-	sharedEvidence := stagingEvidence(t, stagingPrivate, edition.Shared, now, "123e4567-e89b-42d3-a456-426614174001")
-	dedicatedEvidence := stagingEvidence(t, stagingPrivate, edition.Dedicated, now, "123e4567-e89b-42d3-a456-426614174002")
 	manifest := ArtifactManifest{Schema: ManifestSchema, ReleaseID: testRelease, SourceCommit: testCommit, CreatedAt: now.Add(-time.Minute), SBOMDigest: digest("sbom"), Artifacts: []Artifact{{Path: "bin/brick-host-isolation", Digest: digest("binary"), SizeBytes: 4096}, {Path: "docs/release.md", Digest: digest("docs"), SizeBytes: 512}}}
 	if err := SignArtifactManifest(&manifest, manifestPrivate); err != nil {
 		t.Fatal(err)
 	}
+	manifestDigest, err := digestValue(manifest)
+	if err != nil {
+		t.Fatal(err)
+	}
+	releaseBinding := edition.ReleaseEvidenceBinding{SchemaVersion: edition.ReleaseEvidenceBindingSchema, CandidateReleaseID: testRelease, CandidateCommitSHA: testCommit, ArtifactManifestDigest: manifestDigest, SBOMDigest: manifest.SBOMDigest}
+	sharedEvidence := stagingEvidence(t, stagingPrivate, edition.Shared, now, "123e4567-e89b-42d3-a456-426614174001", releaseBinding)
+	dedicatedEvidence := stagingEvidence(t, stagingPrivate, edition.Dedicated, now, "123e4567-e89b-42d3-a456-426614174002", releaseBinding)
 	benchmark := BenchmarkEvidence{Schema: BenchmarkSchema, ReleaseID: testRelease, SourceCommit: testCommit, MeasuredAt: now.Add(-time.Minute), EnvironmentDigest: digest("benchmark-environment"), Results: []BenchmarkResult{{Name: "BenchmarkCertify", Iterations: 1000, NanosecondsPerOp: 20000, AllocationsPerOp: 10, BytesPerOp: 4096}}}
 	if err := SignBenchmarkEvidence(&benchmark, benchmarkPrivate); err != nil {
 		t.Fatal(err)
@@ -192,10 +198,10 @@ func newFixture(t testing.TB) fixture {
 	if err != nil {
 		t.Fatal(err)
 	}
-	return fixture{authority: authority, request: Request{Schema: Schema, ReleaseID: testRelease, SourceCommit: testCommit, ArtifactManifest: manifest, BenchmarkEvidence: benchmark, SecurityReview: review, StagingEvidence: map[edition.Edition]edition.Evidence{edition.Shared: sharedEvidence, edition.Dedicated: dedicatedEvidence}, CoreGates: gates}, now: now, audit: audit, limiter: limiter, manifestPrivate: manifestPrivate, reviewPrivate: reviewPrivate, certificatePublic: certificatePublic}
+	return fixture{authority: authority, request: Request{Schema: Schema, ReleaseID: testRelease, SourceCommit: testCommit, ArtifactManifest: manifest, BenchmarkEvidence: benchmark, SecurityReview: review, StagingEvidence: map[edition.Edition]edition.Evidence{edition.Shared: sharedEvidence, edition.Dedicated: dedicatedEvidence}, CoreGates: gates}, now: now, audit: audit, limiter: limiter, manifestPrivate: manifestPrivate, reviewPrivate: reviewPrivate, stagingPrivate: stagingPrivate, certificatePublic: certificatePublic}
 }
 
-func stagingEvidence(t testing.TB, key ed25519.PrivateKey, current edition.Edition, now time.Time, evidenceID string) edition.Evidence {
+func stagingEvidence(t testing.TB, key ed25519.PrivateKey, current edition.Edition, now time.Time, evidenceID string, releaseBinding edition.ReleaseEvidenceBinding) edition.Evidence {
 	t.Helper()
 	profile := lifecycle.ProfileSharedTenant
 	if current == edition.Dedicated {
@@ -206,7 +212,7 @@ func stagingEvidence(t testing.TB, key ed25519.PrivateKey, current edition.Editi
 	for _, scenario := range scenarios {
 		observations = append(observations, edition.Observation{Scenario: scenario, Passed: true, EvidenceDigest: digest(string(scenario) + string(current))})
 	}
-	evidence := edition.Evidence{Schema: edition.Schema, EvidenceID: evidenceID, Edition: current, Profile: profile, CageID: "cage-" + string(current), BindingDigest: digest("binding" + string(current)), IssuedAt: now.Add(-time.Minute), Observations: observations}
+	evidence := edition.Evidence{Schema: edition.Schema, EvidenceID: evidenceID, Edition: current, Profile: profile, CageID: "cage-" + string(current), BindingDigest: digest("binding" + string(current)), ReleaseBinding: releaseBinding, IssuedAt: now.Add(-time.Minute), Observations: observations}
 	if err := edition.SignEvidence(&evidence, key); err != nil {
 		t.Fatal(err)
 	}

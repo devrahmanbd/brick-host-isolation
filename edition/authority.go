@@ -219,16 +219,17 @@ type Observation struct {
 	EvidenceDigest string   `json:"evidenceDigest"`
 }
 type Evidence struct {
-	Schema             string            `json:"schema"`
-	EvidenceID         string            `json:"evidenceId"`
-	Edition            Edition           `json:"edition"`
-	Profile            lifecycle.Profile `json:"profile"`
-	CageID             string            `json:"cageId"`
-	BindingDigest      string            `json:"bindingDigest"`
-	IssuedAt           time.Time         `json:"issuedAt"`
-	Observations       []Observation     `json:"observations"`
-	SignatureAlgorithm string            `json:"signatureAlgorithm"`
-	Signature          string            `json:"signature"`
+	Schema             string                 `json:"schema"`
+	EvidenceID         string                 `json:"evidenceId"`
+	Edition            Edition                `json:"edition"`
+	Profile            lifecycle.Profile      `json:"profile"`
+	CageID             string                 `json:"cageId"`
+	BindingDigest      string                 `json:"bindingDigest"`
+	ReleaseBinding     ReleaseEvidenceBinding `json:"releaseBinding"`
+	IssuedAt           time.Time              `json:"issuedAt"`
+	Observations       []Observation          `json:"observations"`
+	SignatureAlgorithm string                 `json:"signatureAlgorithm"`
+	Signature          string                 `json:"signature"`
 }
 type ScenarioRunner interface {
 	Run(context.Context, Scenario, Compilation) (Observation, error)
@@ -246,11 +247,11 @@ func NewStagingAuthority(key ed25519.PrivateKey, runner ScenarioRunner, audit Au
 	}
 	return &StagingAuthority{key: append(ed25519.PrivateKey(nil), key...), runner: runner, audit: audit, now: now}, nil
 }
-func (a *StagingAuthority) Run(ctx context.Context, actor, evidenceID string, compilation Compilation) (Evidence, error) {
+func (a *StagingAuthority) Run(ctx context.Context, actor, evidenceID string, compilation Compilation, releaseBinding ReleaseEvidenceBinding) (Evidence, error) {
 	if a == nil || a.runner == nil || a.audit == nil || a.now == nil {
 		return Evidence{}, fmt.Errorf("%w: staging dependency unavailable", ErrUnavailable)
 	}
-	if !evidenceIDPattern.MatchString(evidenceID) || verifyCompilation(compilation) != nil {
+	if !evidenceIDPattern.MatchString(evidenceID) || verifyCompilation(compilation) != nil || ValidateReleaseEvidenceBinding(releaseBinding) != nil {
 		return a.deny(actor, compilation.CageID, "invalid_staging_request")
 	}
 	observations := make([]Observation, 0, len(requiredScenarios))
@@ -264,11 +265,11 @@ func (a *StagingAuthority) Run(ctx context.Context, actor, evidenceID string, co
 		}
 		observations = append(observations, observation)
 	}
-	evidence := Evidence{Schema: Schema, EvidenceID: evidenceID, Edition: compilation.Edition, Profile: compilation.Profile, CageID: compilation.CageID, BindingDigest: compilation.BindingDigest, IssuedAt: a.now().UTC(), Observations: observations, SignatureAlgorithm: SignatureAlgorithm}
+	evidence := Evidence{Schema: Schema, EvidenceID: evidenceID, Edition: compilation.Edition, Profile: compilation.Profile, CageID: compilation.CageID, BindingDigest: compilation.BindingDigest, ReleaseBinding: releaseBinding, IssuedAt: a.now().UTC(), Observations: observations, SignatureAlgorithm: SignatureAlgorithm}
 	if err := SignEvidence(&evidence, a.key); err != nil {
 		return Evidence{}, fmt.Errorf("%w: evidence signing failed", ErrUnavailable)
 	}
-	if err := a.audit.RecordEvent(actor, "runStagingMatrix", "authorized", compilation.CageID, map[string]any{"edition": compilation.Edition, "evidenceId": evidence.EvidenceID, "bindingDigest": evidence.BindingDigest}); err != nil {
+	if err := a.audit.RecordEvent(actor, "runStagingMatrix", "authorized", compilation.CageID, map[string]any{"edition": compilation.Edition, "evidenceId": evidence.EvidenceID, "bindingDigest": evidence.BindingDigest, "releaseEvidenceBindingDigest": mustReleaseEvidenceBindingDigest(releaseBinding), "candidateReleaseId": releaseBinding.CandidateReleaseID}); err != nil {
 		return Evidence{}, fmt.Errorf("%w: audit sink rejected authorization", ErrUnavailable)
 	}
 	return evidence, nil
@@ -293,7 +294,7 @@ func SignEvidence(evidence *Evidence, key ed25519.PrivateKey) error {
 	return nil
 }
 func VerifyEvidence(evidence Evidence, key ed25519.PublicKey) error {
-	if len(key) != ed25519.PublicKeySize || evidence.Schema != Schema || !evidenceIDPattern.MatchString(evidence.EvidenceID) || !validEditionProfile(evidence.Edition, evidence.Profile) || !digestPattern.MatchString(evidence.BindingDigest) || evidence.SignatureAlgorithm != SignatureAlgorithm || !validObservations(evidence.Observations) {
+	if len(key) != ed25519.PublicKeySize || evidence.Schema != Schema || !evidenceIDPattern.MatchString(evidence.EvidenceID) || !validEditionProfile(evidence.Edition, evidence.Profile) || !digestPattern.MatchString(evidence.BindingDigest) || ValidateReleaseEvidenceBinding(evidence.ReleaseBinding) != nil || evidence.SignatureAlgorithm != SignatureAlgorithm || !validObservations(evidence.Observations) {
 		return ErrDenied
 	}
 	signature, err := base64.RawStdEncoding.DecodeString(evidence.Signature)
@@ -322,4 +323,12 @@ func canonicalEvidence(evidence Evidence) ([]byte, error) {
 	evidence.Observations = append([]Observation(nil), evidence.Observations...)
 	sort.Slice(evidence.Observations, func(i, j int) bool { return evidence.Observations[i].Scenario < evidence.Observations[j].Scenario })
 	return json.Marshal(evidence)
+}
+
+func mustReleaseEvidenceBindingDigest(binding ReleaseEvidenceBinding) string {
+	digest, err := ReleaseEvidenceBindingDigest(binding)
+	if err != nil {
+		return "unavailable"
+	}
+	return digest
 }

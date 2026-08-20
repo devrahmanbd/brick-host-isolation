@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "brick.release-evidence-binding.v1",
+  "candidateReleaseId": "v1.0.0",
+  "candidateCommitSha": "0123456789abcdef0123456789abcdef01234567",
+  "artifactManifestDigest": "000000000000000000000000000000000000000000000000000000000000000b",
+  "sbomDigest": "000000000000000000000000000000000000000000000000000000000000000c"
+}

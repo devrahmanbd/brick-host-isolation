@@ -232,7 +232,12 @@ func (a *Authority) verifyRequest(request Request, now time.Time) error {
 	if err := VerifySecurityReview(request.SecurityReview, a.trust.SecurityReviewKey, now); err != nil || request.SecurityReview.ReleaseID != request.ReleaseID || request.SecurityReview.SourceCommit != request.SourceCommit {
 		return ErrDenied
 	}
-	if err := verifyStagingEvidence(request.StagingEvidence, a.trust.StagingKey, now, a.trust.MaxEvidenceAge); err != nil {
+	manifestDigest, err := digestValue(request.ArtifactManifest)
+	if err != nil {
+		return ErrDenied
+	}
+	expectedBinding := edition.ReleaseEvidenceBinding{SchemaVersion: edition.ReleaseEvidenceBindingSchema, CandidateReleaseID: request.ReleaseID, CandidateCommitSHA: request.SourceCommit, ArtifactManifestDigest: manifestDigest, SBOMDigest: request.ArtifactManifest.SBOMDigest}
+	if err := verifyStagingEvidence(request.StagingEvidence, a.trust.StagingKey, now, a.trust.MaxEvidenceAge, expectedBinding); err != nil {
 		return ErrDenied
 	}
 	return verifyCoreGates(request.CoreGates, a.trust.CoreGateKey, request.ReleaseID, request.SourceCommit, now)
@@ -268,6 +273,13 @@ func (a *Authority) makeCertificate(certificateID string, request Request, now t
 		coreGates[string(gate.Edition)+":"+string(gate.Gate)] = digest
 	}
 	return Certificate{Schema: Schema, CertificateID: certificateID, ReleaseID: request.ReleaseID, SourceCommit: request.SourceCommit, ArtifactManifestDigest: manifestDigest, SBOMDigest: request.ArtifactManifest.SBOMDigest, BenchmarkDigest: benchmarkDigest, SecurityReviewDigest: reviewDigest, StagingEvidenceDigests: staging, CoreGateDigests: coreGates, IssuedAt: now, ExpiresAt: now.Add(a.trust.CertificateTTL), SignatureAlgorithm: SignatureAlgorithm}, nil
+}
+
+// ArtifactManifestDigest is the sole public digest primitive for binding a
+// signed Phase 8 record to a Phase 9 manifest. Callers must never recreate this
+// serialization independently.
+func ArtifactManifestDigest(manifest ArtifactManifest) (string, error) {
+	return digestValue(manifest)
 }
 
 func VerifyArtifactManifest(manifest ArtifactManifest, key ed25519.PublicKey, now time.Time, maxAge time.Duration) error {
@@ -352,13 +364,16 @@ func signRecord(record any, key ed25519.PrivateKey) error {
 	return nil
 }
 
-func verifyStagingEvidence(evidenceByEdition map[edition.Edition]edition.Evidence, key ed25519.PublicKey, now time.Time, maxAge time.Duration) error {
+func verifyStagingEvidence(evidenceByEdition map[edition.Edition]edition.Evidence, key ed25519.PublicKey, now time.Time, maxAge time.Duration, expectedBinding edition.ReleaseEvidenceBinding) error {
+	if edition.ValidateReleaseEvidenceBinding(expectedBinding) != nil {
+		return ErrDenied
+	}
 	if len(evidenceByEdition) != 2 {
 		return ErrDenied
 	}
 	for _, currentEdition := range []edition.Edition{edition.Shared, edition.Dedicated} {
 		evidence, ok := evidenceByEdition[currentEdition]
-		if !ok || evidence.Edition != currentEdition || !fresh(evidence.IssuedAt, now, maxAge) || edition.VerifyEvidence(evidence, key) != nil {
+		if !ok || evidence.Edition != currentEdition || evidence.ReleaseBinding != expectedBinding || !fresh(evidence.IssuedAt, now, maxAge) || edition.VerifyEvidence(evidence, key) != nil {
 			return ErrDenied
 		}
 	}

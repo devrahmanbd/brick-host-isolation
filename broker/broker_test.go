@@ -74,6 +74,12 @@ func (a *phase2Audit) hasReason(reason string) bool {
 	return false
 }
 
+func (a *phase2Audit) setFail(fail bool) {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.fail = fail
+}
+
 type phase2Preflight struct{ err error }
 
 func (p *phase2Preflight) Check(ctx context.Context) error {
@@ -102,7 +108,7 @@ type brokerFixture struct {
 
 func newBrokerFixture(t *testing.T, rate RateLimit) *brokerFixture {
 	t.Helper()
-	now := time.Date(2026, 8, 20, 12, 0, 0, 0, time.UTC)
+	now := time.Now().UTC().Truncate(time.Second)
 	clock := &phase2Clock{now: now}
 	dir, err := os.MkdirTemp("/tmp", "brk2-")
 	if err != nil {
@@ -299,7 +305,7 @@ func TestBrokerRejectsOversizedFramesAndAuditFailure(t *testing.T) {
 	t.Run("audit failure closes without authorizing", func(t *testing.T) {
 		f := newBrokerFixture(t, RateLimit{Capacity: 10, RefillInterval: time.Second})
 		defer f.close()
-		f.audit.fail = true
+		f.audit.setFail(true)
 		if _, err := f.roundTrip(f.request("77777777-7777-4777-8777-777777777777")); err == nil {
 			t.Fatal("roundTrip() succeeded while audit sink was unavailable")
 		}

@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/ed25519"
 	"errors"
+	"fmt"
 	"testing"
 	"time"
 
@@ -64,6 +65,10 @@ func intent(e Edition) Intent {
 	return Intent{Schema: Schema, Edition: e, CageID: "cage-edition-a", BaseRootDigest: "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb", SeccompDigest: "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"}
 }
 
+func releaseBinding() ReleaseEvidenceBinding {
+	return ReleaseEvidenceBinding{SchemaVersion: ReleaseEvidenceBindingSchema, CandidateReleaseID: "v1.0.0", CandidateCommitSHA: "0123456789abcdef0123456789abcdef01234567", ArtifactManifestDigest: fmt.Sprintf("%064x", 31), SBOMDigest: fmt.Sprintf("%064x", 32)}
+}
+
 func TestCompileSharedAndDedicatedRemainStrict(t *testing.T) {
 	c, _ := compiler(t)
 	for _, edition := range []Edition{Shared, Dedicated} {
@@ -110,7 +115,7 @@ func TestStagingSignsCompleteDeterministicMatrix(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	evidence, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled)
+	evidence, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled, releaseBinding())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -136,7 +141,31 @@ func TestStagingFailsClosedOnScenarioFailure(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if _, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled); !errors.Is(err, ErrDenied) {
+	if _, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled, releaseBinding()); !errors.Is(err, ErrDenied) {
 		t.Fatalf("scenario failure: %v", err)
+	}
+}
+
+func TestPhase51StagingRejectsMissingBindingAndSignedBindingTampering(t *testing.T) {
+	c, _ := compiler(t)
+	compiled, err := c.Compile(context.Background(), "actor", intent(Shared))
+	if err != nil {
+		t.Fatal(err)
+	}
+	key := ed25519.NewKeyFromSeed(bytes.Repeat([]byte{6}, ed25519.SeedSize))
+	stage, err := NewStagingAuthority(key, &runner{}, &audit{}, time.Now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled, ReleaseEvidenceBinding{}); !errors.Is(err, ErrDenied) {
+		t.Fatalf("missing binding: %v", err)
+	}
+	evidence, err := stage.Run(context.Background(), "actor", "11111111-1111-4111-8111-111111111111", compiled, releaseBinding())
+	if err != nil {
+		t.Fatal(err)
+	}
+	evidence.ReleaseBinding.SBOMDigest = fmt.Sprintf("%064x", 99)
+	if err := VerifyEvidence(evidence, key.Public().(ed25519.PublicKey)); !errors.Is(err, ErrDenied) {
+		t.Fatalf("tampered signed release binding: %v", err)
 	}
 }

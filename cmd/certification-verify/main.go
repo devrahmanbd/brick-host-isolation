@@ -99,6 +99,11 @@ func requestFixture(now time.Time, manifestKey, benchmarkKey, reviewKey, staging
 	if err := certification.SignArtifactManifest(&manifest, manifestKey); err != nil {
 		return certification.Request{}, err
 	}
+	manifestDigest, err := certification.ArtifactManifestDigest(manifest)
+	if err != nil {
+		return certification.Request{}, err
+	}
+	releaseBinding := edition.ReleaseEvidenceBinding{SchemaVersion: edition.ReleaseEvidenceBindingSchema, CandidateReleaseID: releaseID, CandidateCommitSHA: commit, ArtifactManifestDigest: manifestDigest, SBOMDigest: manifest.SBOMDigest}
 	benchmark := certification.BenchmarkEvidence{Schema: certification.BenchmarkSchema, ReleaseID: releaseID, SourceCommit: commit, MeasuredAt: now.Add(-time.Minute), EnvironmentDigest: digest("environment"), Results: []certification.BenchmarkResult{{Name: "BenchmarkCertify", Iterations: 1000, NanosecondsPerOp: 20000, AllocationsPerOp: 10, BytesPerOp: 4096}}}
 	if err := certification.SignBenchmarkEvidence(&benchmark, benchmarkKey); err != nil {
 		return certification.Request{}, err
@@ -117,18 +122,18 @@ func requestFixture(now time.Time, manifestKey, benchmarkKey, reviewKey, staging
 			gates = append(gates, evidence)
 		}
 	}
-	shared, err := staging(now, stagingKey, edition.Shared, "123e4567-e89b-42d3-a456-426614174001")
+	shared, err := staging(now, stagingKey, edition.Shared, "123e4567-e89b-42d3-a456-426614174001", releaseBinding)
 	if err != nil {
 		return certification.Request{}, err
 	}
-	dedicated, err := staging(now, stagingKey, edition.Dedicated, "123e4567-e89b-42d3-a456-426614174002")
+	dedicated, err := staging(now, stagingKey, edition.Dedicated, "123e4567-e89b-42d3-a456-426614174002", releaseBinding)
 	if err != nil {
 		return certification.Request{}, err
 	}
 	return certification.Request{Schema: certification.Schema, ReleaseID: releaseID, SourceCommit: commit, ArtifactManifest: manifest, BenchmarkEvidence: benchmark, SecurityReview: review, StagingEvidence: map[edition.Edition]edition.Evidence{edition.Shared: shared, edition.Dedicated: dedicated}, CoreGates: gates}, nil
 }
 
-func staging(now time.Time, key ed25519.PrivateKey, current edition.Edition, evidenceID string) (edition.Evidence, error) {
+func staging(now time.Time, key ed25519.PrivateKey, current edition.Edition, evidenceID string, releaseBinding edition.ReleaseEvidenceBinding) (edition.Evidence, error) {
 	profile := lifecycle.ProfileSharedTenant
 	if current == edition.Dedicated {
 		profile = lifecycle.ProfileDedicatedAdministrator
@@ -138,7 +143,7 @@ func staging(now time.Time, key ed25519.PrivateKey, current edition.Edition, evi
 	for _, scenario := range scenarios {
 		observations = append(observations, edition.Observation{Scenario: scenario, Passed: true, EvidenceDigest: digest(string(scenario) + string(current))})
 	}
-	evidence := edition.Evidence{Schema: edition.Schema, EvidenceID: evidenceID, Edition: current, Profile: profile, CageID: "cage-" + string(current), BindingDigest: digest("binding" + string(current)), IssuedAt: now.Add(-time.Minute), Observations: observations}
+	evidence := edition.Evidence{Schema: edition.Schema, EvidenceID: evidenceID, Edition: current, Profile: profile, CageID: "cage-" + string(current), BindingDigest: digest("binding" + string(current)), ReleaseBinding: releaseBinding, IssuedAt: now.Add(-time.Minute), Observations: observations}
 	return evidence, edition.SignEvidence(&evidence, key)
 }
 func keyPair() (ed25519.PublicKey, ed25519.PrivateKey, error) {

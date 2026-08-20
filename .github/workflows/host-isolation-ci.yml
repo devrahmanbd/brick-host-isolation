@@ -126,3 +126,24 @@ jobs:
           check-latest: true
       - name: Validate Phase 9 certification and guarded release
         run: bash ci/phase9-validate.sh
+
+  phase51-release-evidence-binding:
+    name: Phase 51 release-evidence binding gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: devrahmanbd/flamehoster
+          ref: core
+          path: .phase51-core
+          token: ${{ secrets.BRICK_CORE_READ_TOKEN }}
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          check-latest: true
+      - name: Validate reciprocal Core and host-isolation release binding
+        env:
+          BRICK_CORE_DIR: ${{ github.workspace }}/.phase51-core
+        run: bash ci/phase51-validate.sh
