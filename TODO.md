@@ -11,9 +11,12 @@
 
 ## Phase 1 — Versioned lifecycle and attestation contract
 
-- [ ] Implement `brick-host-isolation.v1` parsing and strict validation for create, activate, suspend, destroy, and attest requests.
-- [ ] Require caller SPIFFE identity, policy digest, request ID, issuance/expiry, profile name, cgroup limits, mount plan, executable manifest, network policy, and attestation target in every activation request.
-- [ ] Define the signed attestation, policy-result, and suspension-event envelopes with canonical serialization and replay identifiers.
+- [x] Implement `brick-host-isolation.v1` strict schema, shape, policy, time-window, signature-algorithm, and protected-path validation for create, activate, suspend, destroy, and attest requests.
+- [x] Require caller SPIFFE identity, policy digest, request ID, issuance/expiry, profile name, cgroup limits, mount plan, executable manifest, default-deny network policy, and protected audit target in every authorization request.
+- [x] Define canonical Ed25519-signed lifecycle request and attestation envelopes with replay identifiers and monotonic authorization sequences.
+- [x] Implement a fail-closed lifecycle authority that validates configured caller keys, atomically claims request IDs, records every decision, and produces minimal signed authorization evidence.
+- [x] Add deterministic adversarial tests, a standalone verifier, the Phase 1 operational runbook, a release-gate script, and a GitHub Actions workflow job.
+- [ ] Demonstrate the contract with a durable replay ledger and audit sink in a dedicated staging environment; do not activate a cage from Phase 1 authority alone.
 
 ## Phase 2 — Root-owned broker and caller authentication
 

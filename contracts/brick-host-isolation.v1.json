@@ -1,6 +1,11 @@
 {
   "schema": "brick.host-isolation.v1",
   "purpose": "Versioned, signed lifecycle contract for a reusable host-isolation engine consumed by Brick Shared and Brick Dedicated without exposing control-plane assets to workload cages.",
+  "signatureAlgorithm": "ed25519",
+  "requestValidity": {
+    "maximumSeconds": 900,
+    "maximumFutureClockSkewSeconds": 120
+  },
   "profiles": [
     "sharedTenant",
     "dedicatedAdministrator"
@@ -15,6 +20,7 @@
   "requiredRequestFields": [
     "schema",
     "requestId",
+    "action",
     "issuedAt",
     "expiresAt",
     "callerSpiffeId",
@@ -28,6 +34,7 @@
     "networkPolicy",
     "executableManifestDigest",
     "auditTarget",
+    "signatureAlgorithm",
     "signature"
   ],
   "mandatoryEnforcementLayers": [
@@ -62,6 +69,7 @@
   "attestationFields": [
     "schema",
     "attestationId",
+    "requestId",
     "cageId",
     "profile",
     "hostIdentity",
@@ -72,6 +80,7 @@
     "expiresAt",
     "monotonicSequence",
     "outcome",
+    "signatureAlgorithm",
     "signature"
   ],
   "failClosedConditions": [
