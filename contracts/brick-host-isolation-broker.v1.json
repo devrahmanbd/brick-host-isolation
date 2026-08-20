@@ -1,0 +1,54 @@
+{
+  "schema": "brick.host-isolation.broker.v1",
+  "purpose": "Root-owned local authorization broker protocol for Brick Host Isolation; this protocol authorizes lifecycle intent and does not create a cage or execute a host lifecycle action.",
+  "transport": {
+    "network": "unix",
+    "framing": "uint32-big-endian-length-prefixed-json",
+    "maximumRequestBytes": 65536,
+    "maximumResponseBytes": 16384,
+    "socketOwnership": "configured-root-owner",
+    "socketDirectory": "configured-owner-no-group-or-other-write"
+  },
+  "authentication": {
+    "tlsMinimumVersion": "1.3",
+    "clientAuthentication": "require-and-verify-client-certificate",
+    "workloadIdentity": "exact-spiffe-uri-san",
+    "unixPeerCredential": "configured-uid-allowlist",
+    "identityBinding": "certificate-spiffe-uri-must-equal-signed-request-callerSpiffeId"
+  },
+  "requestEnvelope": [
+    "protocol",
+    "request"
+  ],
+  "responseEnvelope": [
+    "protocol",
+    "status",
+    "reasonCode",
+    "attestation"
+  ],
+  "mandatoryDependencies": [
+    "phase1Authority",
+    "durableReplayLedger",
+    "auditSink",
+    "clock",
+    "hostPreflight",
+    "mTLSClientCA",
+    "serverCertificate"
+  ],
+  "failClosedConditions": [
+    "unsafeSocketPath",
+    "unexpectedSocketOwner",
+    "unexpectedPeerUid",
+    "missingOrInvalidClientCertificate",
+    "unknownSpiffeIdentity",
+    "spiffeRequestIdentityMismatch",
+    "oversizedOrMalformedFrame",
+    "rateLimitExhausted",
+    "requestTimeoutOrCancellation",
+    "unavailablePreflight",
+    "unavailableAuthority",
+    "unavailableAuditSink",
+    "unavailableReplayLedger",
+    "unavailableClock"
+  ]
+}

@@ -20,8 +20,10 @@
 
 ## Phase 2 — Root-owned broker and caller authentication
 
-- [ ] Build the broker over a root-owned Unix socket with mTLS/SPIFFE authentication, socket ownership checks, durable replay ledger, bounded request size, rate limits, cancellation, and audit-before-response behavior.
-- [ ] Fail closed if workload identity, policy signer, audit sink, replay store, clock, or host preflight requirements are unavailable.
+- [x] Build the broker over an owner-controlled Unix socket with TLS 1.3 mTLS, exact SPIFFE URI SAN authentication, Unix peer-UID checks, socket ownership checks, a durable replay ledger, bounded request/response frames, rate limits, cancellation, and audit-before-response behavior.
+- [x] Fail closed if workload identity, Phase 1 authority, audit sink, replay store, clock, socket ownership, TLS client CA, or host preflight requirements are unavailable.
+- [x] Add deterministic broker and ledger adversarial tests, a standalone mTLS Unix-socket verifier, a Phase 2 runbook, release gate, and GitHub Actions job.
+- [ ] Demonstrate the broker under a root-owned production-like service manager with the production TLS PKI, durable local ledger storage, real host preflight, and an audited failure-recovery drill before using it for a lifecycle side effect.
 
 ## Phase 3 — Linux host preflight and immutable base root
 

@@ -22,3 +22,16 @@ jobs:
           check-latest: true
       - name: Validate Phase 1 lifecycle contract
         run: bash ci/phase1-validate.sh
+
+  phase2-root-broker:
+    name: Phase 2 root-broker gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          check-latest: true
+      - name: Validate Phase 2 root-owned broker
+        run: bash ci/phase2-validate.sh
