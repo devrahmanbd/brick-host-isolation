@@ -1,0 +1,24 @@
+{
+  "schema": "brick.host-isolation.release-trust-bundle.v1",
+  "environment": "production",
+  "candidateReleaseId": "v1.0.0",
+  "candidateSourceCommit": "b2ff94d6f8496bd9f14fe55cff651422b953d31c",
+  "certificateTtlSeconds": 3600,
+  "maxEvidenceAgeSeconds": 86400,
+  "keys": {
+    "artifactManifestEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY",
+    "benchmarkEvidenceEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY",
+    "securityReviewEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY",
+    "stagingEvidenceEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY",
+    "coreGateEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY",
+    "certificateEd25519PublicKey": "REPLACE_BASE64_RAW_32_BYTE_PUBLIC_KEY"
+  },
+  "keyIdentifiers": {
+    "artifactManifest": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE",
+    "benchmarkEvidence": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE",
+    "securityReview": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE",
+    "stagingEvidence": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE",
+    "coreGate": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE",
+    "certificate": "REPLACE_NON_SECRET_KMS_OR_HSM_KEY_REFERENCE"
+  }
+}
