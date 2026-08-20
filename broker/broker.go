@@ -179,10 +179,6 @@ func (b *Broker) serveConnection(parent context.Context, connection *net.UnixCon
 		b.record("unix-uid:"+strconv.FormatUint(uint64(uid), 10), "connection", "denied", "unidentified", "untrusted_spiffe_identity")
 		return
 	}
-	if !b.limiter.allow(identity, b.config.Clock) {
-		b.fail(secured, identity, "connection", "unidentified", "rate_limit_exhausted", "denied")
-		return
-	}
 	payload, err := readFrame(secured, b.config.MaxRequestBytes)
 	if err != nil {
 		b.fail(secured, identity, "connection", "unidentified", "malformed_or_oversized_frame", "denied")
@@ -195,6 +191,10 @@ func (b *Broker) serveConnection(parent context.Context, connection *net.UnixCon
 	}
 	if envelope.Request.CallerSPIFFEID != identity {
 		b.fail(secured, identity, string(envelope.Request.Action), envelope.Request.CageID, "spiffe_request_identity_mismatch", "denied")
+		return
+	}
+	if !b.limiter.allow(identity, b.config.Clock) {
+		b.fail(secured, identity, string(envelope.Request.Action), envelope.Request.CageID, "rate_limit_exhausted", "denied")
 		return
 	}
 	requestContext, cancel := context.WithDeadline(parent, deadline)

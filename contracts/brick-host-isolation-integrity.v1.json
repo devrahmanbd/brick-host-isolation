@@ -1,0 +1,13 @@
+{
+  "schema": "brick.host-isolation.integrity.v1",
+  "purpose": "Signed executable and environment integrity contract that binds a verified resource plan to an explicit root-owned executable, interpreter, runtime dependency, argument, and environment manifest.",
+  "signatureAlgorithm": "ed25519",
+  "requiredManifestFields": ["schema", "manifestId", "profile", "entries", "signatureAlgorithm", "signature"],
+  "requiredEntryFields": ["path", "digest", "ownerUid", "mode", "arguments", "environment", "runtimeDependencies"],
+  "requiredRequestFields": ["schema", "cageId", "profile", "resourcePlanDigest", "executablePath", "arguments", "requestedEnvironment"],
+  "allowedExecutablePrefixes": ["/runtime/bin/", "/runtime/interpreters/"],
+  "allowedEnvironmentNames": ["HOME", "LANG", "TMPDIR", "TZ"],
+  "forbiddenEnvironmentPrefixes": ["LD_", "DYLD_", "PYTHON", "PERL", "RUBY", "NODE_", "BASH", "GCONV", "GIO_"],
+  "forbiddenEnvironmentNames": ["CDPATH", "ENV", "GODEBUG", "IFS", "PATH", "SHELLOPTS", "BASHOPTS"],
+  "failClosedConditions": ["untrustedManifestSigner", "invalidManifestSignature", "unverifiedResourcePlan", "resourcePlanMismatch", "unknownExecutable", "digestMismatch", "unsafeExecutableMetadata", "unsafeInterpreter", "unsafeRuntimeDependency", "argumentMismatch", "requestedEnvironment", "unsafeManifestEnvironment", "auditFailure", "cancelledRequest"]
+}

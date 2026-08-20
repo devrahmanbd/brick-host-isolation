@@ -48,8 +48,10 @@
 
 ## Phase 6 — Executable and environment integrity
 
-- [ ] Verify every executable and interpreter against a root-owned manifest of fixed path, digest, arguments, ownership, mode, and approved library/runtime environment.
-- [ ] Clear unsafe environment variables, cwd inheritance, PATH lookup, locale/plugin injection, language-specific preload hooks, and user-controlled dynamic-loader paths.
+- [x] Verify every executable, interpreter, and runtime dependency against an Ed25519-signed root-owned manifest of fixed path, SHA-256 digest, arguments, ownership, mode, and approved runtime environment; bind every plan to a verified Phase 5 resource plan.
+- [x] Forbid unsafe environment variables, cwd inheritance, `PATH` lookup, locale/plugin injection, language preload hooks, shell startup state, and user-controlled dynamic-loader paths; emit an exact minimal execution environment and descriptor-close boundary.
+- [x] Add deterministic adversarial integrity tests, a standalone verifier, Phase 6 runbook, release gate, and GitHub Actions job.
+- [ ] Implement and independently validate a root-owned descriptor-based executor that rechecks the actual opened executable, interpreter, and runtime dependencies immediately before `execve`; demonstrate TOCTOU, symlink, loader, environment, descriptor, and argument-injection resistance on an isolated staging host before running a workload.
 
 ## Phase 7 — Audit, attestation, freeze, and recovery
 
