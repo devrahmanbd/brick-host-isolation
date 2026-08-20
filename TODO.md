@@ -27,8 +27,10 @@
 
 ## Phase 3 — Linux host preflight and immutable base root
 
-- [ ] Validate kernel, cgroup v2 unified hierarchy, user namespaces, seccomp support, LSM posture, mount propagation, time source, protected-path permissions, and required system services before any cage activation.
-- [ ] Create a root-owned read-only base image and a per-cage ephemeral writable layer. Reject host paths, writable protected mounts, symlinks, device nodes, setuid files, and unsafe mount propagation.
+- [x] Validate kernel, cgroup v2 unified hierarchy, user namespaces, seccomp support, actively enforcing LSM posture, mount propagation, time source, protected-path permissions, and required system services before broker authorization can proceed.
+- [x] Validate a root-owned immutable base image and create a per-cage ephemeral `upper`/`work` layer pair. Reject unsafe managed paths, unsafe filesystems, writable protected entries, symlinks, device nodes, setuid/setgid files, unexpected ownership, and unsafe mount propagation.
+- [x] Add deterministic adversarial preflight and base-root tests, a standalone verifier, operational runbook, release-gate script, and GitHub Actions job.
+- [ ] Demonstrate actual root-owned base-image provisioning, production filesystem allowlisting, LSM enforcement, and preflight-driven broker denial/recovery on an isolated staging host before any cage mount or activation.
 
 ## Phase 4 — Namespace, mount, process, and capability boundaries
 

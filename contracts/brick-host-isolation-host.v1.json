@@ -1,0 +1,48 @@
+{
+  "schema": "brick.host-isolation.host.v1",
+  "purpose": "Fail-closed host-admission and immutable base-root preparation contract for Brick Host Isolation before any cage activation.",
+  "requiredHostCapabilities": [
+    "linux",
+    "cgroupV2UnifiedHierarchy",
+    "userNamespaces",
+    "seccompAvailable",
+    "monotonicTimeSource",
+    "safeMountPropagation",
+    "protectedPathOwnership",
+    "requiredServicesHealthy",
+    "lsmEnforcingOrExplicitlyApproved"
+  ],
+  "requiredBaseRootProperties": [
+    "absoluteOwnerControlledPath",
+    "notSymlink",
+    "readOnlyDirectoryTree",
+    "noDeviceNodes",
+    "noSetuidOrSetgidFiles",
+    "noWorldWritableEntries",
+    "noUnsafeMountPropagation",
+    "approvedFilesystemType"
+  ],
+  "perCageLayerProperties": [
+    "cageIdBound",
+    "ephemeralOwnerControlledDirectory",
+    "upperAndWorkDirectories",
+    "noSymlinks",
+    "noDeviceNodes",
+    "noSetuidOrSetgidFiles",
+    "noWorldWritableEntries"
+  ],
+  "failClosedConditions": [
+    "unsupportedPlatform",
+    "missingCgroupV2",
+    "disabledUserNamespaces",
+    "missingSeccomp",
+    "unsafeLsmPosture",
+    "unsafeMountPropagation",
+    "clockUnavailable",
+    "unsafeProtectedPath",
+    "unhealthyRequiredService",
+    "unsafeBaseRoot",
+    "unsafeEphemeralLayer",
+    "unsafeFilesystemType"
+  ]
+}
