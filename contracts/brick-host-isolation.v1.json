@@ -1,0 +1,90 @@
+{
+  "schema": "brick.host-isolation.v1",
+  "purpose": "Versioned, signed lifecycle contract for a reusable host-isolation engine consumed by Brick Shared and Brick Dedicated without exposing control-plane assets to workload cages.",
+  "profiles": [
+    "sharedTenant",
+    "dedicatedAdministrator"
+  ],
+  "lifecycleActions": [
+    "create",
+    "activate",
+    "suspend",
+    "destroy",
+    "attest"
+  ],
+  "requiredRequestFields": [
+    "schema",
+    "requestId",
+    "issuedAt",
+    "expiresAt",
+    "callerSpiffeId",
+    "policyId",
+    "policyDigest",
+    "profile",
+    "cageId",
+    "hostIdentity",
+    "resourcePolicy",
+    "mountPolicy",
+    "networkPolicy",
+    "executableManifestDigest",
+    "auditTarget",
+    "signature"
+  ],
+  "mandatoryEnforcementLayers": [
+    "callerAuthentication",
+    "replayProtection",
+    "userNamespace",
+    "pidNamespace",
+    "mountNamespace",
+    "ipcNamespace",
+    "utsNamespace",
+    "networkNamespace",
+    "cgroupV2",
+    "seccomp",
+    "noNewPrivileges",
+    "capabilityDrop",
+    "immutableBaseRoot",
+    "protectedPathExclusion",
+    "executableManifest",
+    "environmentSanitization",
+    "defaultDenyEgress",
+    "auditBeforeResponse"
+  ],
+  "protectedHostPaths": [
+    "/opt/brick",
+    "/var/lib/brick",
+    "/run/brick",
+    "/etc/brick",
+    "/root",
+    "/var/run/docker.sock",
+    "/run/containerd/containerd.sock"
+  ],
+  "attestationFields": [
+    "schema",
+    "attestationId",
+    "cageId",
+    "profile",
+    "hostIdentity",
+    "policyDigest",
+    "engineReleaseDigest",
+    "enforcementDigest",
+    "issuedAt",
+    "expiresAt",
+    "monotonicSequence",
+    "outcome",
+    "signature"
+  ],
+  "failClosedConditions": [
+    "missingOrInvalidSignature",
+    "expiredRequest",
+    "replayedRequest",
+    "unknownCallerIdentity",
+    "failedHostPreflight",
+    "missingMandatoryLayer",
+    "protectedPathMount",
+    "untrustedExecutable",
+    "unavailableAuditSink",
+    "unavailableReplayLedger",
+    "unresolvedHighSeverityViolation"
+  ]
+}
