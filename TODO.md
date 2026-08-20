@@ -41,8 +41,10 @@
 
 ## Phase 5 — Cgroup v2 and default-deny network enforcement
 
-- [ ] Apply hard CPU, memory, swap, I/O, process, file-descriptor, and wall-clock controls under a broker-owned cgroup v2 subtree.
-- [ ] Create a private network namespace with no direct host network path; require a policy-aware egress proxy or deny all egress.
+- [x] Define and validate hard CPU, memory, swap, I/O, process, file-descriptor, and wall-clock controls under the fixed broker-owned cgroup v2 subtree; emit only a complete canonical controller-write sequence.
+- [x] Define and validate default-deny network policy. `proxyOnly` requires a private network namespace, exact proxy SPIFFE identity, HTTPS-only port-443 endpoint allowlist, and no direct host network path.
+- [x] Add deterministic adversarial resource-policy tests, a standalone verifier, Phase 5 runbook, release gate, and GitHub Actions job.
+- [ ] Implement and independently validate the root-owned cgroup v2 filesystem adapter and private-network executor, then demonstrate limit enforcement, cleanup, no-host-route, no-DNS-bypass, proxy outage, and fail-closed egress recovery on an isolated staging host before a workload is admitted.
 
 ## Phase 6 — Executable and environment integrity
 

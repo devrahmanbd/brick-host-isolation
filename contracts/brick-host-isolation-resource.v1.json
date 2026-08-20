@@ -1,0 +1,14 @@
+{
+  "schema": "brick.host-isolation.resource.v1",
+  "purpose": "Broker-owned cgroup v2 limits and default-deny egress plan contract for a verified Phase 4 isolation plan.",
+  "requiredCgroupFiles": ["cpu.max", "memory.max", "memory.high", "memory.swap.max", "pids.max", "io.max"],
+  "executorBoundLimits": ["fileDescriptorMax", "wallClockSeconds"],
+  "networkModes": ["denyAll", "proxyOnly"],
+  "networkRequirements": {
+    "denyAll": ["emptyAllowedEndpoints", "emptyProxyIdentity"],
+    "proxyOnly": ["privateNetworkNamespace", "exactProxySpiffeIdentity", "httpsOnly", "port443Only", "nonEmptyEndpoints", "noDirectHostPath"]
+  },
+  "forbiddenCgroupPaths": ["/sys/fs/cgroup", "/sys/fs/cgroup/system.slice", "/sys/fs/cgroup/user.slice"],
+  "requiredIsolationFeatures": ["network", "noNewPrivileges", "clearEnvironment", "closeDescriptorsFrom3"],
+  "profiles": ["sharedTenant", "dedicatedAdministrator"]
+}
