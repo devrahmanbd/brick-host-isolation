@@ -62,8 +62,10 @@
 
 ## Phase 8 — Edition adapters and staging evidence
 
-- [ ] Implement the Shared profile compiler for tenant cages and the Dedicated profile compiler for customer administrator cages without duplicating engine code.
-- [ ] Build deterministic staging tests for path, mount, symlink, bind-mount, namespace, process, socket, environment, executable, egress, resource, replay, audit-failure, freeze, recovery, and cross-tenant cases.
+- [x] Implement the Shared profile compiler for tenant cages and the Dedicated profile compiler for customer administrator cages without duplicating engine code or accepting raw engine controls from edition callers.
+- [x] Build deterministic signed staging evidence for path, mount, symlink, bind-mount, namespace, process, socket, environment, executable, egress, resource, replay, audit-failure, freeze, recovery, and cross-tenant cases.
+- [x] Add adversarial compiler and staging-evidence tests, a standalone verifier, Phase 8 runbook, release gate, and GitHub Actions job.
+- [ ] Operate the staging matrix against real isolated Shared and Dedicated hosts using an independent scenario runner and protected evidence store; require security review of signed evidence before either edition accepts tenant workloads.
 
 ## Phase 9 — Certification and guarded release
 

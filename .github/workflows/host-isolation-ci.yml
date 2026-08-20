@@ -100,3 +100,16 @@ jobs:
           check-latest: true
       - name: Validate Phase 7 signed recovery controls
         run: bash ci/phase7-validate.sh
+
+  phase8-edition-staging:
+    name: Phase 8 edition and staging gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          check-latest: true
+      - name: Validate Phase 8 edition adapters and staging evidence
+        run: bash ci/phase8-validate.sh

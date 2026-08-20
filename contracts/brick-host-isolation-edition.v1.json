@@ -1,0 +1,56 @@
+{
+  "schema": "brick.host-isolation.edition.v1",
+  "purpose": "Versioned edition-adapter and deterministic staging-evidence contract for Brick Host Isolation without duplicating engine authority.",
+  "editions": {
+    "shared": {
+      "profile": "sharedTenant",
+      "constraints": ["fixedProfile", "defaultDenyEgress", "manifestBoundExecution", "noHostPrivilege", "noEngineFork"]
+    },
+    "dedicated": {
+      "profile": "dedicatedAdministrator",
+      "constraints": ["fixedProfile", "defaultDenyEgress", "manifestBoundExecution", "noHostPrivilege", "noEngineFork"]
+    }
+  },
+  "requiredStagingScenarios": [
+    "pathTraversal",
+    "mountEscape",
+    "symlinkEscape",
+    "bindMountEscape",
+    "namespaceEscape",
+    "processEscape",
+    "socketExposure",
+    "environmentInjection",
+    "executableInjection",
+    "egressBypass",
+    "resourceExhaustion",
+    "replayAttempt",
+    "auditFailure",
+    "freezeRecovery",
+    "crossTenantIsolation"
+  ],
+  "evidenceFields": [
+    "schema",
+    "evidenceId",
+    "edition",
+    "profile",
+    "cageId",
+    "bindingDigest",
+    "issuedAt",
+    "observations",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "signatureAlgorithm": "ed25519",
+  "failClosedConditions": [
+    "unknownEdition",
+    "profileMismatch",
+    "invalidPlanBinding",
+    "resourceVerifierUnavailable",
+    "missingScenario",
+    "duplicateScenario",
+    "failedScenario",
+    "invalidEvidenceDigest",
+    "auditFailure",
+    "invalidEvidenceSignature"
+  ]
+}
