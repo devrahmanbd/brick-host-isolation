@@ -8,6 +8,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
 	"math/big"
@@ -280,8 +281,11 @@ func TestBrokerRejectsOversizedFramesAndAuditFailure(t *testing.T) {
 		if err := client.Handshake(); err != nil {
 			t.Fatal(err)
 		}
-		if err := writeFrame(client, bytes.Repeat([]byte{'a'}, 9*1024)); err != nil {
-			t.Fatal(err)
+		oversizedLength := make([]byte, 4)
+		binary.BigEndian.PutUint32(oversizedLength, 9*1024)
+		written, err := client.Write(oversizedLength)
+		if err != nil || written != len(oversizedLength) {
+			t.Fatalf("write oversized frame length: written=%d err=%v", written, err)
 		}
 		payload, err := readFrame(client, 8*1024)
 		if err != nil {
