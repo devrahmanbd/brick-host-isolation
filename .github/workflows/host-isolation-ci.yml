@@ -87,3 +87,16 @@ jobs:
           check-latest: true
       - name: Validate Phase 6 executable and environment integrity
         run: bash ci/phase6-validate.sh
+
+  phase7-recovery:
+    name: Phase 7 recovery gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22.x"
+          check-latest: true
+      - name: Validate Phase 7 signed recovery controls
+        run: bash ci/phase7-validate.sh

@@ -1,0 +1,10 @@
+{
+  "schema": "brick.host-isolation.recovery.v1",
+  "purpose": "Signed append-oriented violation and recovery evidence for fail-closed host-isolation suspension and clean rebuild handoff.",
+  "signatureAlgorithm": "ed25519",
+  "requiredRequestFields": ["schema", "recoveryId", "cageId", "callerSpiffeId", "hostIdentity", "policyDigest", "reasonCode"],
+  "requiredEventFields": ["schema", "eventId", "recoveryId", "cageId", "callerSpiffeId", "hostIdentity", "policyDigest", "sequence", "action", "outcome", "reasonCode", "observedAt", "evidenceDigest", "signatureAlgorithm", "signature"],
+  "recoveryOrder": ["recordRequest", "kill", "freeze", "withdrawNetwork", "captureEvidence", "destroy", "cleanRebuildHandoff", "signAttestation"],
+  "redactionRules": ["noHostPaths", "noCommands", "noArguments", "noEnvironment", "noSecrets", "noRawPolicy", "noCustomerPayload"],
+  "failClosedConditions": ["invalidRequest", "cancelledContext", "unavailableJournal", "unavailableAudit", "unavailableEvidenceStore", "killFailure", "freezeFailure", "networkWithdrawalFailure", "destroyFailure", "rebuildHandoffFailure", "invalidEvidenceDigest", "invalidSigner"]
+}

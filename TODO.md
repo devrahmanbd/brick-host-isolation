@@ -55,8 +55,10 @@
 
 ## Phase 7 — Audit, attestation, freeze, and recovery
 
-- [ ] Emit signed, append-oriented lifecycle and violation events; include policy digest, cage ID, caller identity, host identity, monotonic sequence, outcome, and redacted reason code.
-- [ ] Implement kill-first suspension, cgroup freeze, network withdrawal, evidence capture, secure destroy, and clean-rebuild handoff for anomalous cages.
+- [x] Emit Ed25519-signed append-oriented lifecycle and violation events containing policy digest, cage ID, caller identity, host identity, monotonic sequence, outcome, redacted reason code, and an optional evidence digest; reject event tampering.
+- [x] Implement fail-closed kill-first suspension orchestration with cgroup freeze, network withdrawal, evidence capture, secure destroy, and clean-rebuild handoff ordering for anomalous cages; require journal and audit acceptance before the first side effect.
+- [x] Add deterministic adversarial recovery tests, a standalone verifier, Phase 7 runbook, release gate, and GitHub Actions job.
+- [ ] Implement and independently validate root-owned cage-controller, evidence-store, and rebuild-handoff adapters; demonstrate recovery order, no-resume behavior, evidence durability, restart safety, audit/journal outage behavior, secure destroy, and clean-rebuild isolation on an isolated staging host before operational activation.
 
 ## Phase 8 — Edition adapters and staging evidence
 
