@@ -1,0 +1,36 @@
+{
+  "candidateReleaseId": "v1.0.0",
+  "candidateSourceCommit": "b2ff94d6f8496bd9f14fe55cff651422b953d31c",
+  "findings": [
+    {
+      "id": "SR-001",
+      "severity": "high",
+      "scope": "engine,staging-evidence",
+      "summary": "Phase 9 accepts fresh valid Phase 8 evidence without a cryptographic binding to the Phase 9 source commit, artifact manifest digest, or SBOM digest.",
+      "disposition": "Remediate candidate binding and regenerate real-host evidence before approval."
+    },
+    {
+      "id": "SR-002",
+      "severity": "medium",
+      "scope": "engine,certification-replay",
+      "summary": "The authority retains no certificate-ID replay state and relies on correct deployment of the Phase 2 broker ledger.",
+      "disposition": "Enforce broker-only ingress and durable issuance idempotency coverage."
+    },
+    {
+      "id": "SR-003",
+      "severity": "medium",
+      "scope": "artifact-manifest",
+      "summary": "The authority validates an SBOM digest but does not retrieve and reconcile referenced artifact bytes or SBOM metadata.",
+      "disposition": "Require protected signer/evidence-store byte verification and retention before approval."
+    },
+    {
+      "id": "SR-004",
+      "severity": "high",
+      "scope": "staging-evidence",
+      "summary": "No real isolated Shared or Dedicated host evidence exists for the candidate.",
+      "disposition": "Run the full real-host matrix independently for both profiles before approval."
+    }
+  ],
+  "outcome": "rejected",
+  "schema": "brick.host-isolation.preliminary-security-findings.v1"
+}

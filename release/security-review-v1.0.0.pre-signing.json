@@ -1,0 +1,14 @@
+{
+  "schema": "brick.host-isolation.security-review.v1",
+  "releaseId": "v1.0.0",
+  "sourceCommit": "b2ff94d6f8496bd9f14fe55cff651422b953d31c",
+  "reviewId": "e35c4e5d-3e77-4f9e-aadf-3baa2c5e3a73",
+  "reviewerId": "spiffe://brick.example/security/preliminary-assessment",
+  "reviewedAt": "2026-08-20T09:40:00Z",
+  "expiresAt": "2026-08-21T09:40:00Z",
+  "outcome": "rejected",
+  "findingsDigest": "250f755d3df59d3f53e73e39558e4e058ff04309e6f5cd248c25ded55a71625b",
+  "scope": ["artifact-manifest", "engine", "staging-evidence"],
+  "signatureAlgorithm": "pending-separate-ed25519-reviewer",
+  "signature": ""
+}
